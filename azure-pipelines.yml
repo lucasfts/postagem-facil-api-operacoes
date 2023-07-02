@@ -45,5 +45,5 @@ steps:
     azureSubscription: 'Azure basic subscription(bfc785e5-3934-4759-9200-1bcfe3e2d212)'
     appType: 'webAppLinux'
     WebAppName: 'postagem-facil-operacoes-api'
-    packageForLinux: '$(publishDirectory)'
+    packageForLinux: '$(publishDirectory)/**/*.zip'
 
