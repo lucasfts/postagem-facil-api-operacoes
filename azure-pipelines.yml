@@ -13,30 +13,37 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  publishDirectory: 'publish-output' 
 
 steps:
 - task: NuGetToolInstaller@1
+  displayName: Instalar Nuget
 
 - task: NuGetCommand@2
+  displayName: Restaurar pacotes nuget
   inputs:
     restoreSolution: '$(solution)'
 
 - task: DotNetCoreCLI@2
+  displayName: Gerar arquivos de publicação
   inputs:
     command: 'publish'
     publishWebProjects: true
-    arguments: '--output "$(Build.ArtifactStagingDirectory)"'
+    arguments: '--output "$(publishDirectory)"'
 
 - task: PublishBuildArtifacts@1
+  displayName: Upload dos arquivos de publicação
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    PathtoPublish: '$(publishDirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
 
 - task: AzureRmWebAppDeployment@4
+  displayName: Publicar aplicação
   inputs:
     ConnectionType: 'AzureRM'
     azureSubscription: 'Azure basic subscription(bfc785e5-3934-4759-9200-1bcfe3e2d212)'
     appType: 'webAppLinux'
     WebAppName: 'postagem-facil-operacoes-api'
-    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+    packageForLinux: '$(publishDirectory)'
+
