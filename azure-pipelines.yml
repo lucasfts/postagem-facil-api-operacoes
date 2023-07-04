@@ -1,0 +1,49 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  publishDirectory: 'publish-output' 
+
+steps:
+- task: NuGetToolInstaller@1
+  displayName: Instalar Nuget
+
+- task: NuGetCommand@2
+  displayName: Restaurar pacotes nuget
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: DotNetCoreCLI@2
+  displayName: Gerar arquivos de publicação
+  inputs:
+    command: 'publish'
+    publishWebProjects: true
+    arguments: '--output "$(publishDirectory)"'
+
+- task: PublishBuildArtifacts@1
+  displayName: Upload dos arquivos de publicação
+  inputs:
+    PathtoPublish: '$(publishDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+- task: AzureRmWebAppDeployment@4
+  displayName: Publicar aplicação
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Azure basic subscription(bfc785e5-3934-4759-9200-1bcfe3e2d212)'
+    appType: 'webAppLinux'
+    WebAppName: 'postagem-facil-operacoes-api'
+    packageForLinux: '$(publishDirectory)/**/*.zip'
+
